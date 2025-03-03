@@ -1,0 +1,20 @@
+/* Custom CSS for Streamlit App */
+.stButton button {
+    background-color: #4F8BF9;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+.stSelectbox, .stNumberInput {
+    font-size: 16px;
+}
+
+.stSuccess {
+    color: #28a745;
+}
+
+.stError {
+    color: #dc3545;
+}
