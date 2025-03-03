@@ -189,8 +189,6 @@ st.write("Perform different calculations.")
 # =========================
 # **BMI Calculator**
 # # =========================
-# **BMI Calculator**
-# =========================
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -199,53 +197,40 @@ import matplotlib.pyplot as plt
 age = st.number_input("Enter Age:", min_value=1, step=1, format="%d")
 gender = st.selectbox("Select Gender:", ["Male", "Female"])
 
-# **Weight Input (kg or lbs)**
-weight_unit = st.selectbox("Select Weight Unit:", ["kg", "lbs"])
-weight = st.number_input(f"Enter Weight ({weight_unit}):", min_value=0.0, step=0.1, format="%.1f")
+# **Unit selection**
+weight_unit = st.selectbox("Select Weight Unit:", ["kg", "lbs"], key="weight_unit")
+height_unit = "feet & inches"  # Keeping it fixed as per your code
 
+# **Weight Input**
+weight = st.number_input("Enter Weight:", min_value=0.0, step=0.1, format="%.1f", key="weight")
 if weight_unit == "lbs":
-    weight_kg = weight * 0.453592  # Convert lbs to kg
-else:
-    weight_kg = weight
+    weight *= 0.453592  # Convert lbs to kg
 
-# **Height Input (ft & inches)**
-feet = st.number_input("Feet:", min_value=0, step=1, format="%d")
-inches = st.number_input("Inches:", min_value=0, step=1, format="%d")
-height_m = ((feet * 12) + inches) * 0.0254  # Convert ft/in to meters
+# **Height Input**
+feet = st.number_input("Feet:", min_value=0, step=1, format="%d", key="feet")
+inches = st.number_input("Inches:", min_value=0, step=1, format="%d", key="inches")
+height = ((feet * 12) + inches) * 0.0254  # Convert ft/in to meters
 
 # **BMI Calculation & Interpretation**
-if weight_kg > 0 and height_m > 0:
-    bmi = weight_kg / (height_m ** 2)
-    st.success(f"**Your BMI is:** {bmi:.2f}")
+if weight > 0 or height > 0:  # Calculate as soon as any field is filled
+    if weight > 0 and height > 0:
+        bmi = weight / (height ** 2)
+        st.success(f"**Your BMI is:** {bmi:.2f}")
+    elif weight > 0:
+        st.info("⚠️ **Height not entered. BMI cannot be calculated.** However, maintaining a balanced diet and exercise is important.")
+    elif height > 0:
+        st.info("⚠️ **Weight not entered. BMI cannot be calculated.** Ensure a healthy nutrition plan for proper weight management.")
 
     # BMI Categories
-    if bmi < 18.5:
-        st.info("🔵 **You are underweight.** Consider a balanced diet to gain weight.")
-    elif 18.5 <= bmi < 24.9:
-        st.success("✅ **You have a normal weight.** Maintain a healthy lifestyle!")
-    elif 25 <= bmi < 29.9:
-        st.warning("🟠 **You are overweight.** Consider a balanced diet and exercise.")
-    else:
-        st.error("🔴 **You are in the obesity range.** Consult a healthcare professional.")
-
-# **Recommended Health Tips**
-elif weight_kg > 0:
-    st.warning("⚠️ **Enter height to get exact BMI.**")
-    if weight_kg < 50:
-        st.info("🔵 **You might be underweight.** Consider a balanced diet to gain muscle mass.")
-    elif 50 <= weight_kg < 80:
-        st.success("✅ **You are likely in a healthy range.** Maintain an active lifestyle.")
-    else:
-        st.warning("🟠 **Consider managing your weight with proper diet and exercise.**")
-
-elif height_m > 0:
-    st.warning("⚠️ **Enter weight to get exact BMI.**")
-    if height_m < 1.5:
-        st.info("🔵 **Shorter height range detected.** Maintain a good diet for bone health.")
-    elif 1.5 <= height_m < 1.8:
-        st.success("✅ **Average height range detected.** Stay active for better health.")
-    else:
-        st.warning("🟠 **Taller individuals may require higher caloric intake.**")
+    if weight > 0 and height > 0:
+        if bmi < 18.5:
+            st.info("🔵 **You are underweight.** Consider a balanced diet to gain weight.")
+        elif 18.5 <= bmi < 24.9:
+            st.success("✅ **You have a normal weight.** Maintain a healthy lifestyle!")
+        elif 25 <= bmi < 29.9:
+            st.warning("🟠 **You are overweight.** Consider a balanced diet and exercise.")
+        else:
+            st.error("🔴 **You are in the obesity range.** Consult a healthcare professional.")
 
 # **BMI Chart**
 bmi_chart = pd.DataFrame({
@@ -261,13 +246,14 @@ categories = ["Underweight", "Normal", "Overweight", "Obese"]
 bmi_values = [18.4, 24.9, 29.9, 35]
 ax.barh(categories, bmi_values, color=["blue", "green", "orange", "red"])
 
-if weight_kg > 0 and height_m > 0:
+if weight > 0 and height > 0:
     ax.axvline(x=bmi, color='black', linestyle='dashed', label=f'Your BMI: {bmi:.2f}')
-
 
 ax.set_xlabel("BMI")
 ax.set_title("BMI Classification")
 st.pyplot(fig)
+
+
 
 
 # =========================
