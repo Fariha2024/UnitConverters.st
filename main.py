@@ -188,35 +188,34 @@ st.write("Perform different calculations.")
 
 # =========================
 # **BMI Calculator**
+# # =========================
+# **BMI Calculator**
 # =========================
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-
 # **User Inputs**
 age = st.number_input("Enter Age:", min_value=1, step=1, format="%d")
-gender = st.selectbox("Select Gender:", ["Male", "Female", "Other"])
+gender = st.selectbox("Select Gender:", ["Male", "Female"])
 
-# **Unit selection**
+# **Weight Input (kg or lbs)**
 weight_unit = st.selectbox("Select Weight Unit:", ["kg", "lbs"])
-height_unit = st.selectbox("Select Height Unit:", ["feet & inches"])
+weight = st.number_input(f"Enter Weight ({weight_unit}):", min_value=0.0, step=0.1, format="%.1f")
 
-# **Weight Input**
-if weight_unit == "kg":
-    weight = st.number_input("Enter Weight (kg):", min_value=0.0, step=0.1, format="%.1f")
+if weight_unit == "lbs":
+    weight_kg = weight * 0.453592  # Convert lbs to kg
 else:
-    weight = st.number_input("Enter Weight (lbs):", min_value=0.0, step=0.1, format="%.1f")
-    weight = weight * 0.453592  # Convert lbs to kg
+    weight_kg = weight
 
-# **Height Input**
+# **Height Input (ft & inches)**
 feet = st.number_input("Feet:", min_value=0, step=1, format="%d")
 inches = st.number_input("Inches:", min_value=0, step=1, format="%d")
-height = ((feet * 12) + inches) * 0.0254  # Convert ft/in to meters
+height_m = ((feet * 12) + inches) * 0.0254  # Convert ft/in to meters
 
 # **BMI Calculation & Interpretation**
-if weight > 0 and height > 0:
-    bmi = weight / (height ** 2)
+if weight_kg > 0 and height_m > 0:
+    bmi = weight_kg / (height_m ** 2)
     st.success(f"**Your BMI is:** {bmi:.2f}")
 
     # BMI Categories
@@ -229,26 +228,47 @@ if weight > 0 and height > 0:
     else:
         st.error("🔴 **You are in the obesity range.** Consult a healthcare professional.")
 
-    # **BMI Chart**
-    bmi_chart = pd.DataFrame({
-        "BMI Category": ["Underweight", "Normal", "Overweight", "Obese"],
-        "BMI Range": ["< 18.5", "18.5 - 24.9", "25 - 29.9", "30+"],
-        "Color": ["🔵", "✅", "🟠", "🔴"]
-    })
-    st.table(bmi_chart)
+# **Recommended Health Tips**
+elif weight_kg > 0:
+    st.warning("⚠️ **Enter height to get exact BMI.**")
+    if weight_kg < 50:
+        st.info("🔵 **You might be underweight.** Consider a balanced diet to gain muscle mass.")
+    elif 50 <= weight_kg < 80:
+        st.success("✅ **You are likely in a healthy range.** Maintain an active lifestyle.")
+    else:
+        st.warning("🟠 **Consider managing your weight with proper diet and exercise.**")
 
-    # **Plot BMI Chart**
-    fig, ax = plt.subplots()
-    categories = ["Underweight", "Normal", "Overweight", "Obese"]
-    bmi_values = [18.4, 24.9, 29.9, 35]
-    ax.barh(categories, bmi_values, color=["blue", "green", "orange", "red"])
+elif height_m > 0:
+    st.warning("⚠️ **Enter weight to get exact BMI.**")
+    if height_m < 1.5:
+        st.info("🔵 **Shorter height range detected.** Maintain a good diet for bone health.")
+    elif 1.5 <= height_m < 1.8:
+        st.success("✅ **Average height range detected.** Stay active for better health.")
+    else:
+        st.warning("🟠 **Taller individuals may require higher caloric intake.**")
+
+# **BMI Chart**
+bmi_chart = pd.DataFrame({
+    "BMI Category": ["Underweight", "Normal", "Overweight", "Obese"],
+    "BMI Range": ["< 18.5", "18.5 - 24.9", "25 - 29.9", "30+"],
+    "Color": ["🔵", "✅", "🟠", "🔴"]
+})
+st.table(bmi_chart)
+
+# **Plot BMI Chart**
+fig, ax = plt.subplots()
+categories = ["Underweight", "Normal", "Overweight", "Obese"]
+bmi_values = [18.4, 24.9, 29.9, 35]
+ax.barh(categories, bmi_values, color=["blue", "green", "orange", "red"])
+
+if weight_kg > 0 and height_m > 0:
     ax.axvline(x=bmi, color='black', linestyle='dashed', label=f'Your BMI: {bmi:.2f}')
-    ax.set_xlabel("BMI")
-    ax.set_title("BMI Classification")
-    st.pyplot(fig)
 
-else:
-    st.warning("⚠️ Please enter valid weight and height.")
+
+ax.set_xlabel("BMI")
+ax.set_title("BMI Classification")
+st.pyplot(fig)
+
 
 # =========================
 # **Interest Calculator**
